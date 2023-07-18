@@ -17,6 +17,13 @@
   <body>
     <div>
       <label>
+        <div>Sizes:</div>
+        <textarea type="text" id="sizeInput" onchange="handleFile()"></textarea>
+      </label>
+    </div>
+    <hr />
+    <div>
+      <label>
         Input Image:
         <input type="file" id="fileInput" onchange="handleFile()" />
       </label>
@@ -43,6 +50,15 @@
       </label>
     </div>
     <script>
+      sizeInput.value = `
+512x512
+1024x500
+1024x1024 (902x902)
+2732x2732 (1200x1200)
+`.trim()
+      sizeInput.style.minHeight =
+        sizeInput.value.split('\n').length * 1.5 + 'em'
+
       let context = canvas.getContext('2d')
 
       function handleFile() {
@@ -85,22 +101,38 @@
           }
         })
         let color = sampleColor()
-        let sizes = [
-          [512, 512],
-          [1024, 500],
-        ]
-        for (let [w, h] of sizes) {
-          resizeImage(color, 'logo', w, h)
+        let sizes = sizeInput.value
+          .split('\n')
+          .map(s => s.trim())
+          .filter(s => s)
+        for (let size of sizes) {
+          resizeImage(color, 'logo', size)
         }
       }
 
-      function resizeImage(color, name, w, h) {
-        let filename = `${name}-${w}x${h}.jpg`
-        canvas.width = w
-        canvas.height = h
+      function parseSize(size) {
+        return size.split('x').map(x => +x)
+      }
+
+      function fillBackground(color) {
         context.fillStyle = color
         context.rect(0, 0, canvas.width, canvas.height)
         context.fill()
+      }
+
+      function resizeImage(color, name, size) {
+        let parts = size.split(' ')
+        let [w, h] = parseSize(parts[0])
+
+        let [safeW, safeH] = parseSize(
+          (parts[1] || '').replace('(', '').replace(')', ''),
+        )
+
+        let filename = `${name}-${size}.jpg`
+        canvas.width = w
+        canvas.height = h
+
+        fillBackground(color)
 
         let imgRatio = previewImg.naturalWidth / previewImg.naturalHeight
         let canvasRatio = canvas.width / canvas.height
@@ -132,6 +164,24 @@
             gap / 2,
             canvas.width,
             drawHeight,
+          )
+        }
+
+        if (safeW && safeH) {
+          let dataUrl = canvas.toDataURL('image/jpeg')
+          let img = document.createElement('img')
+          img.src = dataUrl
+          fillBackground(color)
+          context.drawImage(
+            img,
+            0,
+            0,
+            canvas.width,
+            canvas.height,
+            (canvas.width - safeW) / 2,
+            (canvas.height - safeH) / 2,
+            safeW,
+            safeH,
           )
         }
 
