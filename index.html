@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>App Store Images</title>
+    <style>
+      img,
+      canvas {
+        max-width: min(100%, 512px);
+        max-height: min(50vh, 512px);
+        outline: 1px solid black;
+      }
+    </style>
+  </head>
+  <body>
+    <div>
+      <label>
+        Input Image:
+        <input type="file" id="fileInput" onchange="handleFile()" />
+      </label>
+    </div>
+    <hr />
+    <div>
+      <div>Download Images:</div>
+      <ul id="downloadList">
+        <li>
+          <a href="javascript:downloadAll()">Download All</a>
+        </li>
+      </ul>
+    </div>
+    <hr />
+    <div style="display: flex">
+      <label>
+        <div>Image Preview:</div>
+        <img id="previewImg" />
+      </label>
+      <hr style="margin: 0 1rem" />
+      <label>
+        <div>Drawing Space:</div>
+        <canvas id="canvas"></canvas>
+      </label>
+    </div>
+    <script>
+      let context = canvas.getContext('2d')
+
+      function handleFile() {
+        let file = fileInput.files[0]
+        if (!file) return
+        let reader = new FileReader()
+        reader.onload = () => {
+          previewImg.onload = handleImage
+          previewImg.src = reader.result
+        }
+        reader.readAsDataURL(file)
+      }
+      handleFile()
+
+      function sampleColor() {
+        canvas.width = 1
+        canvas.height = 1
+        context.drawImage(previewImg, 0, 0, canvas.width, canvas.height)
+        let imageData = context.getImageData(0, 0, canvas.width, canvas.height)
+        let data = imageData.data
+        let code =
+          '#' +
+          d2(data[0].toString(16)) +
+          d2(data[1].toString(16)) +
+          d2(data[2].toString(16))
+        return code
+      }
+
+      function d2(hex) {
+        if (hex.length == 1) {
+          return '0' + hex
+        }
+        return hex
+      }
+
+      function handleImage() {
+        downloadList.querySelectorAll('li').forEach(li => {
+          if (li.querySelector('a').href.startsWith('data:image/')) {
+            li.remove()
+          }
+        })
+        let color = sampleColor()
+        let sizes = [
+          [512, 512],
+          [1024, 500],
+        ]
+        for (let [w, h] of sizes) {
+          resizeImage(color, 'logo', w, h)
+        }
+      }
+
+      function resizeImage(color, name, w, h) {
+        let filename = `${name}-${w}x${h}.jpg`
+        canvas.width = w
+        canvas.height = h
+        context.fillStyle = color
+        context.rect(0, 0, canvas.width, canvas.height)
+        context.fill()
+
+        let imgRatio = previewImg.naturalWidth / previewImg.naturalHeight
+        let canvasRatio = canvas.width / canvas.height
+
+        let drawWidth = canvas.height * imgRatio
+        let drawHeight = canvas.width / imgRatio
+        if (drawHeight > canvas.height) {
+          let gap = canvas.width - drawWidth
+          context.drawImage(
+            previewImg,
+            0,
+            0,
+            previewImg.naturalWidth,
+            previewImg.naturalHeight,
+            gap / 2,
+            0,
+            drawWidth,
+            canvas.height,
+          )
+        } else {
+          let gap = canvas.height - drawHeight
+          context.drawImage(
+            previewImg,
+            0,
+            0,
+            previewImg.naturalWidth,
+            previewImg.naturalHeight,
+            0,
+            gap / 2,
+            canvas.width,
+            drawHeight,
+          )
+        }
+
+        let dataUrl = canvas.toDataURL('image/jpeg')
+        let li = document.createElement('li')
+        let a = document.createElement('a')
+        a.href = dataUrl
+        a.textContent = filename
+        a.download = filename
+        li.appendChild(a)
+        downloadList.appendChild(li)
+      }
+
+      function downloadAll() {
+        downloadList.querySelectorAll('a').forEach(a => {
+          if (!a.href.startsWith('data:image/')) return
+          console.log(a.href)
+        })
+      }
+    </script>
+  </body>
+</html>
