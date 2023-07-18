@@ -198,7 +198,7 @@
       function downloadAll() {
         downloadList.querySelectorAll('a').forEach(a => {
           if (!a.href.startsWith('data:image/')) return
-          console.log(a.href)
+          a.click()
         })
       }
     </script>
