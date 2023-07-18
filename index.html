@@ -74,20 +74,31 @@
       handleFile()
 
       function sampleColor() {
-        canvas.width = 1
-        canvas.height = 1
+        canvas.width = previewImg.naturalWidth
+        canvas.height = previewImg.naturalHeight
         context.drawImage(previewImg, 0, 0, canvas.width, canvas.height)
         let imageData = context.getImageData(0, 0, canvas.width, canvas.height)
         let data = imageData.data
+        let counts = {}
+        for (let offset = 0; offset < data.length; offset += 4) {
+          let key =
+            data[offset + 0] + ',' + data[offset + 1] + ',' + data[offset + 2]
+          let n = counts[key] || 0
+          counts[key] = n + 1
+        }
         let code =
           '#' +
-          d2(data[0].toString(16)) +
-          d2(data[1].toString(16)) +
-          d2(data[2].toString(16))
+          Object.entries(counts)
+            .sort((a, b) => a[1] - b[1])
+            .pop()[0]
+            .split(',')
+            .map(code => toHex(+code))
+            .join('')
         return code
       }
 
-      function d2(hex) {
+      function toHex(code) {
+        let hex = Math.floor(code).toString(16)
         if (hex.length == 1) {
           return '0' + hex
         }
