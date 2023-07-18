@@ -6,4 +6,4 @@ Resize images for app stores
 
 - Support Google Play Store
 - Support Apple App Store
-- Support `ionic cordova resources` (cordova-res)
+- Support `cordova-res --skip-config --copy`
