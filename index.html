@@ -94,7 +94,7 @@
         return hex
       }
 
-      function handleImage() {
+      async function handleImage() {
         downloadList.querySelectorAll('li').forEach(li => {
           if (li.querySelector('a').href.startsWith('data:image/')) {
             li.remove()
@@ -106,7 +106,7 @@
           .map(s => s.trim())
           .filter(s => s)
         for (let size of sizes) {
-          resizeImage(color, 'logo', size)
+          await resizeImage(color, 'logo', size)
         }
       }
 
@@ -120,7 +120,7 @@
         context.fill()
       }
 
-      function resizeImage(color, name, size) {
+      async function resizeImage(color, name, size) {
         let parts = size.split(' ')
         let [w, h] = parseSize(parts[0])
 
@@ -170,7 +170,10 @@
         if (safeW && safeH) {
           let dataUrl = canvas.toDataURL('image/jpeg')
           let img = document.createElement('img')
-          img.src = dataUrl
+          await new Promise((resolve, reject) => {
+            img.onload = resolve
+            img.src = dataUrl
+          })
           fillBackground(color)
           context.drawImage(
             img,
