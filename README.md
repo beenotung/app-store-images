@@ -1,8 +1,9 @@
 # app-store-images
 
+https://app-store-images.surge.sh
+
 Resize images for app stores
 
-Supported App Stores:
-
-- Google Play Store
-- Apple App Store
+- Support Google Play Store
+- Support Apple App Store
+- Support `ionic cordova resources` (cordova-res)
