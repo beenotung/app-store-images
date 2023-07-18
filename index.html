@@ -53,11 +53,14 @@
       sizeInput.value = `
 512x512
 1024x500
-1024x1024 (902x902)
-2732x2732 (1200x1200)
+1024x1024 (902x902) icon.png
+2732x2732 (1200x1200) splash.png
+2732x2732 (1200x1200) icon-background.png
+2732x2732 (1200x1200) icon-foreground.png
 `.trim()
       sizeInput.style.minHeight =
         sizeInput.value.split('\n').length * 1.5 + 'em'
+      sizeInput.style.minWidth = '25em'
 
       let context = canvas.getContext('2d')
 
@@ -139,7 +142,8 @@
           (parts[1] || '').replace('(', '').replace(')', ''),
         )
 
-        let filename = `${name}-${size}.jpg`
+        let filename = parts[2] || `${name}-${size}.png`
+
         canvas.width = w
         canvas.height = h
 
@@ -179,7 +183,7 @@
         }
 
         if (safeW && safeH) {
-          let dataUrl = canvas.toDataURL('image/jpeg')
+          let dataUrl = canvas.toDataURL('image/png')
           let img = document.createElement('img')
           await new Promise((resolve, reject) => {
             img.onload = resolve
@@ -199,7 +203,7 @@
           )
         }
 
-        let dataUrl = canvas.toDataURL('image/jpeg')
+        let dataUrl = canvas.toDataURL('image/png')
         let li = document.createElement('li')
         let a = document.createElement('a')
         a.href = dataUrl
