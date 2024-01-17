@@ -53,10 +53,10 @@
       sizeInput.value = `
 512x512
 1024x500
-1024x1024 (902x902) icon.png
+1240x1240 (1024x1024) icon.png
 2732x2732 (1200x1200) splash.png
-2732x2732 (1200x1200) icon-background.png
-2732x2732 (1200x1200) icon-foreground.png
+2732x2732 (1200x1200) icon_background.png
+2732x2732 (1200x1200) icon_foreground.png
 `.trim()
       sizeInput.style.minHeight =
         sizeInput.value.split('\n').length * 1.5 + 'em'
@@ -89,14 +89,18 @@
           let n = counts[key] || 0
           counts[key] = n + 1
         }
+        let entries = Object.entries(counts)
         let code =
           '#' +
-          Object.entries(counts)
+          entries
             .sort((a, b) => a[1] - b[1])
             .pop()[0]
             .split(',')
             .map(code => toHex(+code))
             .join('')
+        if (code === '#000000' && entries.length === 1) {
+          return '#ffffff'
+        }
         return code
       }
 
@@ -119,6 +123,7 @@
           .split('\n')
           .map(s => s.trim())
           .filter(s => s)
+        // TODO auto crop the image before resize, to avoid duplicated paddings
         for (let size of sizes) {
           await resizeImage(color, 'logo', size)
         }
