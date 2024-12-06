@@ -17,7 +17,11 @@
   <body>
     <div>
       <label>
-        <div>Sizes:</div>
+        <div>
+          Sizes:
+          <button onclick="setAppStorePreset()">App Store Preset</button>
+          <button onclick="setPWAPreset()">PWA Preset</button>
+        </div>
         <textarea type="text" id="sizeInput" onchange="handleFile()"></textarea>
       </label>
     </div>
@@ -50,7 +54,8 @@
       </label>
     </div>
     <script>
-      sizeInput.value = `
+      function setAppStorePreset() {
+        sizeInput.value = `
 512x512
 1024x500
 1240x1240 (1024x1024) icon.png
@@ -58,9 +63,24 @@
 2732x2732 (1200x1200) icon_background.png
 2732x2732 (1200x1200) icon_foreground.png
 `.trim()
-      sizeInput.style.minHeight =
-        sizeInput.value.split('\n').length * 1.5 + 'em'
-      sizeInput.style.minWidth = '25em'
+        updateInputSize()
+        handleFile()
+      }
+      function setPWAPreset() {
+        sizeInput.value = `
+192x192 icon-192.png
+512x512 icon-512.png
+180x180 apple-touch-icon.png
+`.trim()
+        updateInputSize()
+        handleFile()
+      }
+      function updateInputSize() {
+        sizeInput.style.minHeight =
+          sizeInput.value.split('\n').length * 1.5 + 'em'
+        sizeInput.style.minWidth = '25em'
+      }
+      setAppStorePreset()
 
       let context = canvas.getContext('2d')
 
@@ -147,7 +167,7 @@
           (parts[1] || '').replace('(', '').replace(')', ''),
         )
 
-        let filename = parts[2] || `${name}-${size}.png`
+        let filename = parts[2] || parts[1] || `${name}-${size}.png`
 
         canvas.width = w
         canvas.height = h

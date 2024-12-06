@@ -1,9 +1,12 @@
 # app-store-images
 
-https://app-store-images.surge.sh
+Resize images for app stores and PWA logos.
 
-Resize images for app stores
+Hosted at https://app-store-images.surge.sh
+
+## Features
 
 - Support Google Play Store
 - Support Apple App Store
 - Support `cordova-res --skip-config --copy`
+- Support PWA icons
