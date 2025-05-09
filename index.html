@@ -16,14 +16,17 @@
   </head>
   <body>
     <div>
-      <label>
-        <div>
-          Sizes:
-          <button onclick="setAppStorePreset()">App Store Preset</button>
-          <button onclick="setPWAPreset()">PWA Preset</button>
-        </div>
-        <textarea type="text" id="sizeInput" onchange="handleFile()"></textarea>
-      </label>
+      <div>
+        <label for="sizeInput">Sizes:</label>
+        <button onclick="setAppStorePreset()">App Store Preset</button>
+        <button onclick="setPWAPreset()">PWA Preset</button>
+      </div>
+      <textarea
+        style="margin-top: 0.25rem"
+        type="text"
+        id="sizeInput"
+        onchange="handleFile()"
+      ></textarea>
     </div>
     <hr />
     <div>
