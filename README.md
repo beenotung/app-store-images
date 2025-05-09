@@ -10,3 +10,4 @@ Hosted at https://app-store-images.surge.sh
 - Support Apple App Store
 - Support `cordova-res --skip-config --copy`
 - Support PWA icons
+- Template for PWA html `<head>` and `manifest.json`
