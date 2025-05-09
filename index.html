@@ -12,6 +12,30 @@
         max-height: min(50vh, 512px);
         outline: 1px solid black;
       }
+      .code-block {
+        background-color: #333;
+        color: #fff;
+        padding: 0.5rem;
+        border-radius: 0.25rem;
+        display: inline-block;
+        text-wrap: wrap;
+        display: inline-block;
+        white-space: pre-wrap;
+      }
+      .inline-code {
+        background-color: #00f1;
+        color: #f50;
+        padding: 0.125rem 0.25rem;
+        border-radius: 0.25rem;
+        font-weight: bold;
+      }
+      #pwaTemplateContainer .field {
+        margin-bottom: 0.5rem;
+      }
+      #pwaTemplateContainer .code-label {
+        margin-top: 0.5rem;
+        margin-bottom: 0.25rem;
+      }
     </style>
   </head>
   <body>
@@ -45,6 +69,68 @@
       </ul>
     </div>
     <hr />
+    <div id="pwaTemplateContainer" hidden>
+      <div class="field">
+        <label>
+          App Name:
+          <input
+            id="appNameInput"
+            placeholder="App Name"
+            oninput="setupPWATemplate()"
+          />
+        </label>
+      </div>
+      <div class="field">
+        <label>
+          Theme Color:
+          <input
+            id="themeColorInput"
+            placeholder="#C0FFEE"
+            oninput="setupPWATemplate()"
+          />
+        </label>
+      </div>
+      <div class="field">
+        <label>
+          App Description:
+          <br />
+          <textarea
+            id="appDescriptionInput"
+            placeholder="A PWA App"
+            cols="50"
+            rows="2"
+            oninput="setupPWATemplate()"
+          ></textarea>
+        </label>
+      </div>
+      <div class="field">
+        <label>
+          Icon Path Prefix:
+          <input
+            id="pathPrefixInput"
+            placeholder="/"
+            oninput="setupPWATemplate()"
+          />
+        </label>
+      </div>
+      <div class="code-label">
+        HTML <code class="inline-code">head</code> Template:
+      </div>
+      <code
+        class="code-block"
+        id="pwaTemplate"
+        onclick="copyText(pwaTemplate)"
+      ></code>
+      <div class="code-label">
+        <code class="inline-code">manifest.json</code>:
+      </div>
+      <code
+        class="code-block"
+        id="pwaManifest"
+        onclick="copyText(pwaManifest)"
+      ></code>
+      <hr />
+    </div>
     <div style="display: flex">
       <label>
         <div>Image Preview:</div>
@@ -58,6 +144,7 @@
     </div>
     <script>
       function setAppStorePreset() {
+        pwaTemplateContainer.hidden = true
         sizeInput.value = `
 512x512
 1024x500
@@ -70,6 +157,8 @@
         handleFile()
       }
       function setPWAPreset() {
+        pwaTemplateContainer.hidden = false
+        setupPWATemplate()
         sizeInput.value = `
 192x192 icon-192.png
 512x512 icon-512.png
@@ -79,12 +168,81 @@
         updateInputSize()
         handleFile()
       }
+      function getInputValue(input, prefix) {
+        let value = input.value.trim() || input.placeholder
+        if (prefix && !value.startsWith(prefix)) {
+          value = prefix + value
+        }
+        return value
+      }
+      function setupPWATemplate() {
+        let name = getInputValue(appNameInput)
+        let desc = getInputValue(appDescriptionInput)
+        let color = getInputValue(themeColorInput, '#')
+        let pathPrefix = getInputValue(pathPrefixInput, '/')
+
+        while (pathPrefix.endsWith('/')) {
+          pathPrefix = pathPrefix.slice(0, -1)
+        }
+        if (pathPrefix == '/') {
+          pathPrefix = ''
+        }
+
+        pwaTemplate.textContent =
+          '  ' +
+          /* html */ `
+  <meta charset="utf-8">
+  <title>${name}</title>
+
+  <meta name="viewport" content="viewport-fit=cover, width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="description" content="${desc}">
+  <meta name="theme-color" content="${color}">
+
+  <meta name="format-detection" content="telephone=no">
+  <meta name="msapplication-tap-highlight" content="no">
+
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="${name}">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+  <meta http-equiv="x-ua-compatible" content="IE=Edge">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="${pathPrefix}/apple-touch-icon.png">
+  <link rel="icon" type="image/x-icon" href="${pathPrefix}/favicon.ico">
+  <link rel="manifest" href="${pathPrefix}/manifest.json">
+`.trim() +
+          '\n'
+        pwaManifest.textContent =
+          /* json */ `
+{
+  "name": "${name}",
+  "short_name": "${name}",
+  "start_url": "/",
+  "display": "standalone",
+  "icons": [
+    {
+      "src": "${pathPrefix}/icon192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "${pathPrefix}/icon512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "background_color": "${color}",
+  "theme_color": "${color}"
+}
+`.trim() + '\n'
+      }
       function updateInputSize() {
         sizeInput.style.minHeight =
           sizeInput.value.split('\n').length * 1.5 + 'em'
         sizeInput.style.minWidth = '25em'
       }
       setAppStorePreset()
+      setPWAPreset()
 
       let context = canvas.getContext('2d')
 
@@ -247,6 +405,27 @@
           if (!a.href.startsWith('data:image/')) return
           a.click()
         })
+      }
+
+      async function copyText(target) {
+        let text = target.textContent
+        try {
+          await navigator.clipboard.writeText(text)
+          alert('Copied to clipboard')
+        } catch (error) {
+          // clipboard API not supported, fallback to use execCommand
+          let textarea = document.createElement('textarea')
+          textarea.value = text
+          document.body.appendChild(textarea)
+          textarea.select()
+          try {
+            document.execCommand('copy')
+            alert('Copied to clipboard')
+          } catch (err) {
+            alert('Failed to copy text')
+          }
+          textarea.remove()
+        }
       }
     </script>
   </body>
